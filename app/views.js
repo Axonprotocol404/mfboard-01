@@ -1,4 +1,5 @@
-// The pages, each a function from API data to HTML.
+// The pages, each a function from API data to HTML. Every page escapes API
+// values with esc() and has an empty state when there is nothing to show.
 
 import { closed, date, esc, media, money, timeLeft } from './format.js';
 
@@ -8,12 +9,15 @@ const pot = (b) => money(b.potUsd ?? b.rewardAmount);
 /** The entry fee, when the bounty charges one. */
 const fee = (b) => (b.entryFeeUsd ? `${money(b.entryFeeUsd)} entry fee` : '');
 
+/** The color class for a deadline that is close (renders red within 6 hours). */
 const timeCls = (b) => {
   const ms = new Date(b.deadline).getTime() - Date.now();
-  if (ms <= 0) return '';
-  if (ms < 6 * 3600000) return 'class="soon"';
-  return '';
+  return ms > 0 && ms < 6 * 3600000 ? ' class="soon"' : '';
 };
+
+/** An <a> to a hash route with its argument URL-encoded and its text escaped. */
+const link = (route, arg, text, cls = '') =>
+  `<a${cls ? ` class="${cls}"` : ''} href="#${route ? `/${route}/${encodeURIComponent(arg)}` : '/'}">${esc(text)}</a>`;
 
 /** The board: the live bounties, richest pot first, with a client-side filter. */
 export function board(data, query = '', isClosed = false) {
@@ -21,28 +25,29 @@ export function board(data, query = '', isClosed = false) {
   const items = (data.items ?? [])
     .filter((b) => !q || `${b.title} ${b.slug} ${b.summary ?? ''}`.toLowerCase().includes(q))
     .sort((a, b) => Number(b.potUsd ?? b.rewardAmount) - Number(a.potUsd ?? a.rewardAmount));
+  const total = items.reduce((s, b) => s + Number(b.potUsd ?? b.rewardAmount), 0);
+  // One list row per bounty: title, pot, time left, entry count, fee, leaderboard link.
   const rows = items
     .map(
       (b) => `
       <li>
         <div class="row1">
-          <a href="#/bounty/${encodeURIComponent(b.slug)}">${esc(b.title)}</a>
+          ${link('bounty', b.slug, b.title)}
           <span class="pot">${pot(b)}</span>
         </div>
         <div class="row2">
-          <span ${timeCls(b)}>${timeLeft(b.deadline)}</span>
+          <span${timeCls(b)}>${timeLeft(b.deadline)}</span>
           <span>${b.submissionCount} ${b.submissionCount === 1 ? 'entry' : 'entries'}</span>
           ${b.entryFeeUsd ? `<span class="fee">${fee(b)}</span>` : ''}
-          <span><a href="#/leaderboard/${encodeURIComponent(b.slug)}">leaderboard</a></span>
+          <span>${link('leaderboard', b.slug, 'leaderboard')}</span>
         </div>
       </li>`,
     )
     .join('');
-  const total = items.reduce((s, b) => s + Number(b.potUsd ?? b.rewardAmount), 0);
   return `
     <h1>${isClosed ? 'Closed bounties' : 'Live bounties'}</h1>
     <p class="counts">${items.length} bounties · ${money(total)} in pots${q ? ` · filtered by “${esc(q)}”` : ''}</p>
-    <ul class="board">${rows || '<li class="muted">Nothing matches.</li>'}</ul>`;
+    <ul class="board">${rows || `<li class="muted">${q ? 'Nothing matches that filter.' : 'No bounties right now — check back soon.'}</li>`}</ul>`;
 }
 
 /** A bounty's page: summary, rules, the rewards table and its dates. */
@@ -56,17 +61,17 @@ export function bounty(b) {
         .join('')
     : '';
   return `
-    <p class="breadcrumb"><a href="#/">← All bounties</a></p>
+    <p class="breadcrumb">${link('', '', '← All bounties')}</p>
     <h1>${esc(b.title)}</h1>
     <p class="muted">${esc(b.summary ?? '')}</p>
     <dl>
       <dt>Pot</dt><dd><strong>${pot(b)}</strong></dd>
       ${b.entryFeeUsd ? `<dt>Entry fee</dt><dd>${money(b.entryFeeUsd)}</dd>` : ''}
       <dt>Status</dt><dd>${closed(b) ? 'Closed (deadline passed)' : 'Open'}</dd>
-      <dt>Deadline</dt><dd ${timeCls(b)}>${date(b.deadline)} · ${timeLeft(b.deadline)}</dd>
+      <dt>Deadline</dt><dd${timeCls(b)}>${date(b.deadline)} · ${timeLeft(b.deadline)}</dd>
       <dt>Entries</dt><dd>${b.submissionCount}</dd>
       <dt>Sponsor</dt><dd>${esc(b.sponsor?.name ?? 'make.fun')}</dd>
-      <dt>Leaderboard</dt><dd><a href="#/leaderboard/${encodeURIComponent(b.slug)}">see standings</a></dd>
+      <dt>Leaderboard</dt><dd>${link('leaderboard', b.slug, 'see standings')}</dd>
     </dl>
     ${prizes ? `<h2>Prizes</h2><table><tr><th>Place</th><th>Amount</th></tr>${prizes}</table>` : ''}
     <h2>Description</h2>
@@ -77,12 +82,12 @@ export function bounty(b) {
 /** A bounty's leaderboard: every ranked entry with its handle, title and the
  * API's own per-column values (e.display), the winner marked. */
 export function leaderboard(data, slug) {
-  const cols = (data.columns ?? []).map(
-    (c) => `<th title="${esc(c.key)}">${esc(c.title ?? c.key ?? '')}</th>`,
-  ).join('');
+  const cols = (data.columns ?? [])
+    .map((c) => `<th title="${esc(c.key)}">${esc(c.title ?? c.key ?? '')}</th>`)
+    .join('');
   const rows = (data.entries ?? [])
     .map((e) => {
-      const entryCell = `<td><a href="#/profile/${encodeURIComponent(e.handle)}">${esc(e.handle)}</a>${
+      const entryCell = `<td>${link('profile', e.handle, e.handle)}${
         e.title ? `<br><span class="muted small">${esc(String(e.title).slice(0, 90))}</span>` : ''
       }</td>`;
       const cells = (data.columns ?? [])
@@ -93,15 +98,18 @@ export function leaderboard(data, slug) {
     })
     .join('');
   return `
-    <p class="breadcrumb"><a href="#/bounty/${encodeURIComponent(slug)}">← Bounty</a></p>
+    <p class="breadcrumb">${link('bounty', slug, '← Bounty')}</p>
     <h1>${esc(data.title ?? 'Leaderboard')}</h1>
     <p class="counts">${(data.entries ?? []).length} ranked entries</p>
-    <table><tr><th>#</th><th>Entry</th>${cols}</tr>${rows || '<tr><td>No entries yet.</td></tr>'}</table>`;
+    <table><tr><th>#</th><th>Entry</th>${cols}</tr>${
+      rows || '<tr><td class="muted">No entries yet — be the first.</td></tr>'
+    }</table>`;
 }
 
 /** A person's public profile: identity, record and their wallet. */
 export function profile(p) {
   const rec = p.record ?? {};
+  // 'prize_usd' -> 'Prize Usd'; values get money/# formatting where they read better.
   const label = (k) => k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   const value = (k, v) =>
     k === 'prize_usd' ? money(v) : k === 'best_placement' ? `#${v}` : String(v ?? '—');
@@ -119,7 +127,7 @@ export function profile(p) {
     .join('');
   const avatar = p.avatar ?? p.image;
   return `
-    <p class="breadcrumb"><a href="#/">← All bounties</a></p>
+    <p class="breadcrumb">${link('', '', '← All bounties')}</p>
     <div class="profile-head">
       ${avatar ? `<img src="${esc(media(avatar))}" crossorigin="anonymous" alt="">` : ''}
       <div>
@@ -135,6 +143,6 @@ export function profile(p) {
         ? `<p class="muted">Wallet: <a href="${esc(p.wallet.explorer_url ?? '#')}" rel="noopener"><code>${esc(
             p.wallet.address,
           )}</code></a></p>`
-        : ''
+        : '<p class="muted">No public wallet.</p>'
     }`;
 }

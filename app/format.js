@@ -1,14 +1,19 @@
-// Small helpers for showing API values.
+// Small helpers for showing API values. All text that comes from the API
+// passes through esc() before it is placed inside HTML.
 
-/** Text made safe to put inside HTML. */
+/** Text made safe to put inside HTML (also safe for attribute values). */
 export function esc(value) {
   return String(value ?? '').replace(/[&<>\"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-/** A dollar amount ('1000.00' or 0.5) as '$1,000' or '$0.50'. */
+/** A dollar amount ('1000.00' or 0.5) as '$1,000' or '$0.50'; '$0' when absent. */
 export function money(value) {
-  const n = Number(value);
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: Number.isInteger(n) ? 0 : 2 });
+  const n = Number(value) || 0;
+  return n.toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+  });
 }
 
 /** A deadline as a date in UTC. */
@@ -31,7 +36,7 @@ export function timeLeft(iso) {
 /** True when a bounty's deadline has passed (a bounty past its deadline may
  * still read status open until results are published, so the deadline decides). */
 export function closed(b) {
-  return b.deadline && new Date(b.deadline).getTime() <= Date.now();
+  return Boolean(b.deadline) && new Date(b.deadline).getTime() <= Date.now();
 }
 
 /** An avatar or share image URL from the API, absolute; empty when absent. */

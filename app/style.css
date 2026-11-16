@@ -173,15 +173,6 @@ tr:last-child td { border-bottom: none; }
 
 .rank1 td:first-child { color: var(--warn); font-weight: 700; }
 
-.avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  vertical-align: -4px;
-  margin-right: 6px;
-  crossorigin="anonymous";
-}
-
 .profile-head {
   display: flex;
   align-items: center;
@@ -193,7 +184,6 @@ tr:last-child td { border-bottom: none; }
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  crossorigin="anonymous";
 }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -228,4 +218,3 @@ th:not(:first-child):not(:nth-child(2)), td:not(:first-child):not(:nth-child(2))
   .board .row1 .pot { margin-left: 0; }
   table { display: block; overflow-x: auto; }
 }
-

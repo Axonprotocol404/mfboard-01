@@ -2,6 +2,7 @@
 // person's public profile, on hash routes.
 //
 //   #/                          the board of live bounties
+//   #/bounties/closed           the board of closed bounties
 //   #/bounty/<slug>             one bounty
 //   #/leaderboard/<slug>        that bounty's leaderboard
 //   #/profile/<handle>          a person's public profile
@@ -10,12 +11,11 @@
 // screen, so a screenshot script knows when to capture.
 
 import { getBounties, getBounty, getLeaderboard, getProfile } from './api.js';
+import { closed } from './format.js';
 import { board, bounty, leaderboard, profile } from './views.js';
 
 const app = document.getElementById('app');
 const q = document.getElementById('q');
-
-import { closed } from './format.js';
 
 /** Only bounties whose deadline is still ahead (an open status can outlive a deadline). */
 const liveOnly = (data) => ({ ...data, items: (data.items ?? []).filter((b) => !closed(b)) });
@@ -25,38 +25,54 @@ const closedOnly = (data) => ({ ...data, items: (data.items ?? []).filter(closed
 /** True while a render is in flight, so back-to-back hashchange events collapse. */
 let rendering = false;
 
+/** A friendly error page: the message is escaped before it is shown. */
+const errorPage = (err) =>
+  `<p class="error">Could not load this page. ${esc(err.message ?? String(err))}</p>
+   <p class="muted">Check your connection and reload, or <a href="#/">go back to the board</a>.</p>`;
+
 async function render() {
   if (rendering) return;
   rendering = true;
   window.__shotReady = false;
   try {
+    // Route from the hash: '#/bounty/my-slug' -> ['bounty', 'my-slug'].
     const hash = location.hash || '#/';
-    let seg = hash.replace(/^#\/?/, '');
-    const [head, ...rest] = seg.split('/');
+    const [head, ...rest] = hash.replace(/^#\/?/, '').split('/');
     const arg = decodeURIComponent(rest.join('/') ?? '');
-    if (head === 'bounty' && arg) {
-      const b = await getBounty(arg);
-      document.title = `${b.title} | make.fun board`;
-      app.innerHTML = bounty(b);
-    } else if (head === 'leaderboard' && arg) {
-      const data = await getLeaderboard(arg);
-      document.title = `Standings | ${arg} | make.fun board`;
-      app.innerHTML = leaderboard(data, arg);
-    } else if (head === 'profile' && arg) {
-      const p = await getProfile(arg);
-      document.title = `@${p.handle} | make.fun board`;
-      app.innerHTML = profile(p);
-    } else if (head === 'bounties' && arg === 'closed') {
-      document.title = 'Closed bounties | make.fun board';
-      app.innerHTML = board(closedOnly(await getBounties('open')), q.value, true);
-    } else {
-      // The board reads a fresh copy so the pots and the time left are live.
-      const data = await getBounties('open');
-      document.title = 'make.fun board';
-      app.innerHTML = board(liveOnly(data), q.value);
+    switch (head) {
+      case 'bounty': {
+        if (!arg) throw new Error('no bounty given');
+        const b = await getBounty(arg);
+        document.title = `${b.title} | make.fun board`;
+        app.innerHTML = bounty(b);
+        break;
+      }
+      case 'leaderboard': {
+        if (!arg) throw new Error('no bounty given');
+        const data = await getLeaderboard(arg);
+        document.title = `Standings | ${arg} | make.fun board`;
+        app.innerHTML = leaderboard(data, arg);
+        break;
+      }
+      case 'profile': {
+        if (!arg) throw new Error('no handle given');
+        const p = await getProfile(arg);
+        document.title = `@${p.handle} | make.fun board`;
+        app.innerHTML = profile(p);
+        break;
+      }
+      case 'bounties':
+        document.title = 'Closed bounties | make.fun board';
+        app.innerHTML = board(closedOnly(await getBounties('open')), q.value, true);
+        break;
+      default:
+        // The board reads a fresh copy so the pots and the time left are live.
+        document.title = 'make.fun board';
+        app.innerHTML = board(liveOnly(await getBounties('open')), q.value);
     }
   } catch (err) {
-    app.innerHTML = `<p class="error">${String(err.message ?? err)}</p>`;
+    document.title = 'Error | make.fun board';
+    app.innerHTML = errorPage(err);
   }
   window.scrollTo(0, 0);
   rendering = false;

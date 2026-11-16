@@ -8,6 +8,7 @@ const API = 'https://make.fun/api';
 const inflight = new Map();
 const cache = new Map();
 
+/** GET a path, deduplicating concurrent calls and caching for the session. */
 async function get(path, { fresh = false } = {}) {
   if (!fresh && cache.has(path)) return cache.get(path);
   if (inflight.has(path)) return inflight.get(path);
