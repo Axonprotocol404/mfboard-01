@@ -1,5 +1,6 @@
-// make.fun's public API: read-only GET requests, open to any origin (CORS).
-// The full API is described at https://make.fun/api/openapi.json.
+// make.fun's public API client: read-only GET requests, open to any origin (CORS).
+// Deduplicates concurrent calls per path and caches each answer for the session.
+// Full reference: https://make.fun/api/openapi.json.
 
 const API = 'https://make.fun/api';
 

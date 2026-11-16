@@ -1,3 +1,6 @@
+/* make.fun board styles: a light, single-column layout with a sticky header,
+   card-style bounty list, data tables and a small set of color tokens. */
+
 :root {
   --ink: #16181d;
   --muted: #6b7280;

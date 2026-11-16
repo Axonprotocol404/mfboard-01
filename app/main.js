@@ -1,12 +1,10 @@
-// A make.fun frontend: the board, a bounty's page, its leaderboard and a
-// person's public profile, on hash routes.
-//
+// make.fun board router: maps the location hash to views (board, bounty page,
+// leaderboard, profile) and renders each into #app after fetching its data.
 //   #/                          the board of live bounties
 //   #/bounties/closed           the board of closed bounties
 //   #/bounty/<slug>             one bounty
 //   #/leaderboard/<slug>        that bounty's leaderboard
 //   #/profile/<handle>          a person's public profile
-//
 // window.__shotReady is false while a page loads and true once its data is on
 // screen, so a screenshot script knows when to capture.
 

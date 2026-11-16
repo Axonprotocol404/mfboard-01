@@ -1,10 +1,8 @@
-// Entry point the grader runs with MAKEFUN_OUTPUT_DIR set; see the notes below.
-// A working makefun-frontend-01 entry (Node 22, standard library only): the frontend is this directory's app/
-// folder, plain static files a browser opens at app/index.html (ES modules, CSS, no build step), reading make.fun's
-// public API at https://make.fun/api. The program hands it in: it copies app/ and screenshots/ from beside this file
-// to /output and writes /output/dossier.json, the summary the judge reads (your screenshots, the first load's files
-// and bytes, and your source), with the vendored make.fun library. Leave vendor/makefun-frontend.ts as it is: the
-// scorer requires dossier.json to be byte for byte what its own copy writes.
+// Entry point the grader runs with MAKEFUN_OUTPUT_DIR set (default /output):
+// copies this directory's app/ (plain static files, no build step) and
+// screenshots/ out, then writes dossier.json with the vendored make.fun library.
+// Leave vendor/makefun-frontend.ts as it is: the scorer requires dossier.json to
+// be byte for byte what its own copy writes.
 //
 // A starting point, not a winner: a plain board of open bounties and a page for each. Build your frontend in app/
 // (a leaderboard, profiles, speed, ease of use), put 3 PNG or JPEG screenshots of it running on live data in

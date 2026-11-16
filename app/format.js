@@ -1,5 +1,6 @@
-// Small helpers for showing API values. All text that comes from the API
-// passes through esc() before it is placed inside HTML.
+// Small formatting helpers for showing API values (money, dates, countdowns).
+// All text from the API goes through esc() before it is placed inside HTML, so
+// nothing can inject markup.
 
 /** Text made safe to put inside HTML (also safe for attribute values). */
 export function esc(value) {

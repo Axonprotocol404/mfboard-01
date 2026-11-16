@@ -1,5 +1,5 @@
-// The pages, each a function from API data to HTML. Every page escapes API
-// values with esc() and has an empty state when there is nothing to show.
+// The pages: each a function from API data to HTML. Every page escapes API
+// values with esc() and falls back to an empty state when nothing to show.
 
 import { closed, date, esc, media, money, timeLeft } from './format.js';
 
