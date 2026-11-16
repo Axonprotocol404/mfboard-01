@@ -2,7 +2,7 @@
 
 /** Text made safe to put inside HTML. */
 export function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  return String(value ?? '').replace(/[&<>\"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
 /** A dollar amount ('1000.00' or 0.5) as '$1,000' or '$0.50'. */
@@ -26,4 +26,16 @@ export function timeLeft(iso) {
   if (days > 0) return `${days}d ${hours}h left`;
   if (hours > 0) return `${hours}h ${minutes}m left`;
   return `${minutes}m left`;
+}
+
+/** True when a bounty's deadline has passed (a bounty past its deadline may
+ * still read status open until results are published, so the deadline decides). */
+export function closed(b) {
+  return b.deadline && new Date(b.deadline).getTime() <= Date.now();
+}
+
+/** An avatar or share image URL from the API, absolute; empty when absent. */
+export function media(url) {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `https://make.fun${url}`;
 }

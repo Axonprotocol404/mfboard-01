@@ -1,48 +1,231 @@
+:root {
+  --ink: #16181d;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --accent: #7c3aed;
+  --accent-ink: #ffffff;
+  --good: #059669;
+  --warn: #b45309;
+  --bad: #b91c1c;
+}
+
+* { box-sizing: border-box; }
+
 body {
   margin: 0 auto;
-  max-width: 960px;
-  padding: 0 16px 48px;
-  font: 16px/1.5 system-ui, sans-serif;
-  color: #1a1a1a;
+  max-width: 980px;
+  padding: 0 16px 56px;
+  font: 15px/1.5 system-ui, sans-serif;
+  color: var(--ink);
+  background: #fafafa;
 }
 
 header {
-  padding: 16px 0;
-  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 2;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+#q {
+  flex: 1;
+  min-width: 180px;
+  max-width: 340px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+}
+
+header nav {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+header nav a {
+  color: var(--accent);
+  text-decoration: none;
   font-weight: 600;
 }
 
-a {
-  color: #0b5cad;
+footer {
+  margin-top: 32px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+a { color: var(--accent); }
+
+.muted { color: var(--muted); }
+
+h1 { font-size: 22px; margin: 20px 0 8px; }
+h2 { font-size: 17px; margin: 20px 0 6px; }
+
+.counts {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 12px;
 }
 
 .board {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .board li {
-  display: grid;
-  grid-template-columns: 1fr 7em 9em 8em 7em;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 8px 0;
 }
+
+.board .row1 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.board .row1 a {
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.pot {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--good);
+  white-space: nowrap;
+}
+
+.board .row2 {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.fee { color: var(--warn); }
+
+.soon { color: var(--bad); font-weight: 600; }
 
 dl {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 4px 16px;
+  margin: 12px 0;
 }
 
-dt {
-  font-weight: 600;
-}
-
-dd {
-  margin: 0;
-}
+dt { font-weight: 600; color: var(--muted); }
+dd { margin: 0; }
 
 .description {
   white-space: pre-wrap;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
 }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th, td {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+th {
+  background: #f3f4f6;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+tr:last-child td { border-bottom: none; }
+
+.rank1 td:first-child { color: var(--warn); font-weight: 700; }
+
+.avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  vertical-align: -4px;
+  margin-right: 6px;
+  crossorigin="anonymous";
+}
+
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 12px 0;
+}
+
+.profile-head img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  crossorigin="anonymous";
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.error {
+  color: var(--bad);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.breadcrumb { font-size: 13px; margin: 14px 0 0; }
+
+.small { font-size: 12px; }
+
+td code { font-size: 12px; }
+
+/* Number columns right-aligned for easy comparison. */
+th:not(:first-child):not(:nth-child(2)), td:not(:first-child):not(:nth-child(2)) { white-space: nowrap; }
+
+@media (max-width: 640px) {
+  .board .row1 .pot { margin-left: 0; }
+  table { display: block; overflow-x: auto; }
+}
+
